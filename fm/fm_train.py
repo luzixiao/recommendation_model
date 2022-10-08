@@ -34,12 +34,12 @@ class FmLayer(nn.Module):
         self.drop = nn.Dropout(0.2)
 
     def forward(self, x):
-        linear_part = self.linear(x)
-        inter_part1 = torch.pow(torch.mm(x, self.v), 2)
-        inter_part2 = torch.mm(torch.pow(x, 2), torch.pow(self.v, 2))
-        pair_interactions = torch.sum(torch.sub(inter_part1, inter_part2), dim=1)
+        linear_part = self.linear(x) # linear层包含偏执 w + sum（w * x)
+        inter_part1 = torch.pow(torch.mm(x, self.v), 2) # (x * v) ^ 2
+        inter_part2 = torch.mm(torch.pow(x, 2), torch.pow(self.v, 2)) # x^2 * v^2
+        pair_interactions = torch.sum(torch.sub(inter_part1, inter_part2), dim=1) # sum((x * v)^2 - (x^2 * v^2))
         self.drop(pair_interactions)
-        output = linear_part.transpose(1, 0) + 0.5 * pair_interactions
+        output = linear_part.transpose(1, 0) + 0.5 * pair_interactions # w + sum（w * x) + sum((x * v)^2 - (x^2 * v^2))
         return output.view(-1, 1)
 
 
